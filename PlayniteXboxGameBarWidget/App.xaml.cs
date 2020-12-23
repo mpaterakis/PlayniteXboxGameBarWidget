@@ -1,29 +1,46 @@
-﻿using System;
-using Windows.ApplicationModel.Activation;
-using Windows.Foundation;
-using Windows.UI.Xaml;
-using Windows.UI.Xaml.Controls;
-using Microsoft.Gaming.XboxGameBar;
-
-namespace PlayNiteWidget
+﻿namespace PlayNiteWidget
 {
+    using Microsoft.Gaming.XboxGameBar;
+    using System;
+    using System.Diagnostics;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Windows.ApplicationModel.Activation;
+    using Windows.UI.Xaml;
+    using Windows.UI.Xaml.Controls;
+
     /// <summary>
     /// Provides application-specific behavior to supplement the default Application class.
     /// </summary>
-    sealed partial class App : Application
+    internal sealed partial class App : Application
     {
+        /// <summary>
+        /// Defines the uriToLaunch.
+        /// </summary>
         internal static string uriToLaunch = @"playnitefullscreen://";
+
+        /// <summary>
+        /// Defines the appLaunched.
+        /// </summary>
+        protected bool appLaunched = false;
+
+        /// <summary>
+        /// Defines the playniteWidget.
+        /// </summary>
         private XboxGameBarWidget playniteWidget = null;
 
         /// <summary>
-        /// Initializes the singleton application object.  This is the first line of authored code
-        /// executed, and as such is the logical equivalent of main() or WinMain().
+        /// Initializes a new instance of the <see cref="App"/> class.
         /// </summary>
         public App()
         {
             this.InitializeComponent();
         }
 
+        /// <summary>
+        /// The OnActivated.
+        /// </summary>
+        /// <param name="args">The args<see cref="IActivatedEventArgs"/>.</param>
         protected override void OnActivated(IActivatedEventArgs args)
         {
             XboxGameBarWidgetActivatedEventArgs widgetArgs = null;
@@ -52,27 +69,54 @@ namespace PlayNiteWidget
                 }
             }
 
-            OpenPlayniteAsync();
+            // Open Playnite straight away
+            OpenPlaynite();
         }
 
+        /// <summary>
+        /// This is triggered on a window state change and auto-closes the widget when it gets restored.
+        /// </summary>
+        /// <param name="sender">The sender<see cref="XboxGameBarWidget"/>.</param>
+        /// <param name="args">The args<see cref="object"/>.</param>
         private void Widget1_WindowStateChanged(XboxGameBarWidget sender, object args)
         {
             if (playniteWidget.WindowState == XboxGameBarWidgetWindowState.Restored)
             {
+                QueueForWidgetClose();
+            }
+        }
+
+        /// <summary>
+        /// Queues the widget for closing once playnite has opened.
+        /// </summary>
+        private void QueueForWidgetClose()
+        {
+            // If app isn't launched, try again in 1 second
+            // Otherwise close the widget
+            if (!appLaunched)
+            {
+                Task.Delay(new TimeSpan(0, 0, 1)).ContinueWith(o => {
+                    QueueForWidgetClose();
+                });
+            } else
+            {
+                appLaunched = false;
                 playniteWidget.Close();
             }
         }
 
-
         /// <summary>
-        /// The OpenPlaynite.
+        /// Opens Playnite.
         /// </summary>
-        /// <returns>The <see cref="IAsyncOperation{bool}"/>.</returns>
-        public async void OpenPlayniteAsync()
+        private async void OpenPlaynite()
         {
             Uri uri = new Uri(uriToLaunch);
-            await Windows.System.Launcher.LaunchUriAsync(uri);
+            await Windows.System.Launcher.LaunchUriAsync(uri); // Call once to start the app
 
+            // Call again to bring to focus
+            Thread.Sleep(1000);
+            await Windows.System.Launcher.LaunchUriAsync(uri);
+            appLaunched = true;
         }
     }
 }
