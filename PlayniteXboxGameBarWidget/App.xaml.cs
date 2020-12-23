@@ -22,7 +22,7 @@
         /// <summary>
         /// Defines the appLaunched.
         /// </summary>
-        protected bool appLaunched = false;
+        private bool appLaunched = false;
 
         /// <summary>
         /// Defines the playniteWidget.
