@@ -12,7 +12,7 @@
   <Identity
     Name="PlayniteXboxWidget"
     Publisher="CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US"
-    Version="1.0.0.0" />
+    Version="1.0.2.0" />
 
   <mp:PhoneIdentity PhoneProductId="4b9dee15-da50-4b0a-8337-9b84da542023" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
@@ -49,8 +49,8 @@
         <uap3:Extension Category="windows.appExtension">
           <uap3:AppExtension Name="microsoft.gameBarUIExtension"
                              Id="PlayniteWidget"
-                             DisplayName="Playnite Desktop"
-                             Description="Playnite Desktop GameBar Widget"
+                             DisplayName="Launch Playnite"
+                             Description="Playnite Xbox Game Bar Widget"
                              PublicFolder="GameBar">
             <uap3:Properties>
               <GameBarWidget Type="Standard">
